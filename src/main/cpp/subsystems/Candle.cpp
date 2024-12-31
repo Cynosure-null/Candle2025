@@ -2,8 +2,9 @@
 #include "subsystems/Candle.h"
 
 
-Candle::Candle()
+Candle::Candle(std::function<bool()> HasGP)
 {
+    this->HasGP = HasGP;
     ctre::phoenix::led::CANdleConfiguration config;
     config.stripType = ctre::phoenix::led::LEDStripType::RGB; // GRB?
     config.brightnessScalar = 0.5;
@@ -48,16 +49,16 @@ void Candle::Periodic()
         state = DISABLED; // Not always blinking. Assume normal disabled then check for time in state
         }
     }
-    else if (wants_r + wants_g + wants_b > 0) // Rationale is that getting a GP resets all these to 0
-    {
-        state = WANTGP;
-    }
+    
     else if (HasGP())
     {
         wants_r = 0;
         wants_g = 0;
         wants_b = 0;
         state = HASGP;
+    }else if (wants_r + wants_g + wants_b > 0 && !HasGP())  // Rationale is that getting a GP resets all these to 0
+    {
+        state = WANTGP;
     }
     else if (frc::DriverStation::IsEnabled()) // Must be last because WantGP and HasGP conflict
     {
@@ -223,11 +224,6 @@ void Candle::WantGP(int r, int g, int b)
     wants_r = r;
     wants_g = g;
     wants_b = b;
-};
-
-bool Candle::HasGP()
-{
-    return false; // TODO
 };
 
 bool Candle::IsAuto()

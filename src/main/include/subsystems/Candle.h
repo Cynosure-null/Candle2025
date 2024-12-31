@@ -11,13 +11,12 @@
 
 class Candle : public frc2::SubsystemBase {
     public:
-        Candle();
+        Candle(std::function<bool()> HasGP );
         void Periodic() override;
         void WantGP(int r, int g, int b);
 
+        std::function<bool()> HasGP;
     private:
-
-        bool HasGP();
         bool IsAuto();
         bool IsRed();
 
